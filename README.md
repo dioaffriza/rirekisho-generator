@@ -6,6 +6,10 @@ Renders pixel-accurate, standard JIS-format A4 履歴書 PDFs directly in the br
 
 ---
 
+![Showcase Demo](static/showcase.gif)
+
+---
+
 ## ✨ Features
 
 - **Bilingual Interface & PDF (日英併記)**:

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>履歴書メーカー / Rirekisho CV Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body>
+
+    <!-- ===== Header ===== -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="header-title">
+                <h1>履歴書メーカー</h1>
+                <span class="subtitle">Bilingual Rirekisho &amp; Japanese CV Generator</span>
+            </div>
+
+            <div class="header-actions">
+                <!-- PDF Format Style Selector -->
+                <div class="style-selector">
+                    <label for="pdf_style">形式 / Format:</label>
+                    <select id="pdf_style" name="pdf_style">
+                        <option value="bilingual" selected>日英併記 / Bilingual</option>
+                        <option value="japanese">日本語のみ / Japanese</option>
+                    </select>
+                </div>
+
+                <button type="button" id="btn-download-font" class="btn btn-font" title="日本語フォントをダウンロード / Download Font">
+                    <span class="btn-icon">⬇</span> フォント <small>/ Font</small>
+                </button>
+                <button type="button" id="btn-sample" class="btn btn-secondary" title="サンプルデータを入力 / Load Sample Data">
+                    <span class="btn-icon">✨</span> サンプル <small>/ Sample</small>
+                </button>
+                <button type="button" id="btn-clear" class="btn btn-secondary" title="フォームを初期化 / Clear Form">
+                    <span class="btn-icon">🗑</span> クリア <small>/ Clear</small>
+                </button>
+                <button type="button" id="btn-save" class="btn btn-secondary" title="フォームデータをJSONで保存 / Save JSON">
+                    <span class="btn-icon">💾</span> 保存 <small>/ Save</small>
+                </button>
+                <button type="button" id="btn-load" class="btn btn-secondary" title="JSONファイルからデータを読み込み / Load JSON">
+                    <span class="btn-icon">📂</span> 読込 <small>/ Load</small>
+                </button>
+                <button type="button" id="btn-preview" class="btn btn-secondary" title="PDFプレビューを表示 / Preview PDF">
+                    <span class="btn-icon">👁</span> プレビュー <small>/ Preview</small>
+                </button>
+                <button type="button" id="btn-generate" class="btn btn-primary" title="PDFファイルを生成してダウンロード / Export PDF">
+                    <span class="btn-icon">📄</span> PDF生成 <small>/ Export</small>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== Main Content ===== -->
+    <main class="app-main">
+        <!-- ---------- Left Column: Form ---------- -->
+        <div class="form-column">
+
+            <!-- Section 1: 基本情報 -->
+            <section class="form-section">
+                <h3 class="section-title">基本情報 <span class="sub-en">/ Basic Information</span></h3>
+
+                <div class="form-group">
+                    <label for="name_furigana">氏名（ふりがな） <span class="sub-en">/ Full Name (Furigana / Reading)</span></label>
+                    <input type="text" id="name_furigana" name="name_furigana" placeholder="やまだ たろう">
+                </div>
+
+                <div class="form-group">
+                    <label for="name_kanji">氏名 <span class="sub-en">/ Full Name (Kanji &amp; Romaji)</span></label>
+                    <input type="text" id="name_kanji" name="name_kanji" placeholder="山田 太郎 / Taro Yamada">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="birth_date">生年月日 <span class="sub-en">/ Date of Birth</span></label>
+                        <input type="date" id="birth_date" name="birth_date">
+                        <p id="birth_date_calc" class="helper-text" style="color: #2563eb;"></p>
+                    </div>
+                    <div class="form-group">
+                        <label>性別 <span class="sub-en">/ Gender</span></label>
+                        <div class="radio-pills">
+                            <input type="radio" id="gender_male" name="gender" value="男" checked>
+                            <label for="gender_male" class="pill">男 / Male</label>
+                            <input type="radio" id="gender_female" name="gender" value="女">
+                            <label for="gender_female" class="pill">女 / Female</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="photo">写真 <span class="sub-en">/ Portrait Photo</span></label>
+                    <div class="photo-upload-area">
+                        <div class="photo-preview" id="photo-preview">
+                            <span class="photo-placeholder">写真<br><small>Photo</small></span>
+                        </div>
+                        <div class="photo-controls">
+                            <input type="file" id="photo" name="photo" accept="image/*">
+                            <p class="helper-text">推奨: 縦4cm × 横3cm（比率 4:3） / Recommended: 4cm × 3cm</p>
+                            <button type="button" id="btn-remove-photo" class="btn btn-secondary" style="display:none; padding:4px 8px; font-size:12px; margin-top:4px;">写真を削除 / Remove Photo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: 住所 -->
+            <section class="form-section">
+                <h3 class="section-title">住所 <span class="sub-en">/ Present Address</span></h3>
+
+                <div class="form-group">
+                    <label for="postal_code">〒 郵便番号 <span class="sub-en">/ Postal Code</span></label>
+                    <input type="text" id="postal_code" name="postal_code" placeholder="100-0001" class="input-short">
+                </div>
+
+                <div class="form-group">
+                    <label for="address_furigana">ふりがな <span class="sub-en">/ Address Furigana</span></label>
+                    <input type="text" id="address_furigana" name="address_furigana" placeholder="とうきょうと ちよだく...">
+                </div>
+
+                <div class="form-group">
+                    <label for="address">現住所 <span class="sub-en">/ Address</span></label>
+                    <textarea id="address" name="address" rows="2" placeholder="東京都千代田区千代田1-1 (1-1 Chiyoda, Chiyoda-ku, Tokyo)"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="phone">電話番号 <span class="sub-en">/ Phone Number</span></label>
+                        <input type="text" id="phone" name="phone" placeholder="090-1234-5678">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="email">メールアドレス <span class="sub-en">/ Email Address</span></label>
+                        <input type="email" id="email" name="email" placeholder="taro@example.com">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: 連絡先 -->
+            <section class="form-section">
+                <details class="collapsible-section">
+                    <summary class="section-title section-title-collapsible">
+                        連絡先 <span class="sub-en">/ Alternate Contact (Optional)</span>
+                        <span class="collapse-indicator">▼</span>
+                    </summary>
+                    <p class="helper-text section-note">現住所以外に連絡を希望する場合のみ記入 / Fill only if contact is desired at an alternate location</p>
+
+                    <div class="form-group">
+                        <label for="postal_code_2">〒 郵便番号 <span class="sub-en">/ Postal Code</span></label>
+                        <input type="text" id="postal_code_2" name="postal_code_2" placeholder="000-0000" class="input-short">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address_furigana_2">ふりがな <span class="sub-en">/ Furigana</span></label>
+                        <input type="text" id="address_furigana_2" name="address_furigana_2">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address_2">住所 <span class="sub-en">/ Alternate Address</span></label>
+                        <textarea id="address_2" name="address_2" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone_2">電話番号 <span class="sub-en">/ Alternate Phone</span></label>
+                        <input type="text" id="phone_2" name="phone_2" placeholder="090-0000-0000">
+                    </div>
+                </details>
+            </section>
+
+            <!-- Section 4: 学歴 -->
+            <section class="form-section">
+                <h3 class="section-title">学歴 <span class="sub-en">/ Education</span></h3>
+                <div class="dynamic-list" id="education-list" data-type="education">
+                    <div class="dynamic-list-header">
+                        <span class="col-year">年 / Yr</span>
+                        <span class="col-month">月 / Mo</span>
+                        <span class="col-detail">学校名・学部・学科・入学・卒業 / School &amp; Status</span>
+                        <span class="col-action"></span>
+                    </div>
+                    <div class="dynamic-row">
+                        <input type="number" class="input-year" name="education_year" placeholder="2014" min="1900" max="2100">
+                        <select class="input-month" name="education_month">
+                            <option value="">月 / Mo</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <input type="text" class="input-detail" name="education_detail" placeholder="○○高等学校 卒業 / Graduated from Tokyo High School">
+                        <button type="button" class="btn-remove" title="削除 / Remove">×</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add-row" data-target="education-list">+ 行を追加 / Add Row</button>
+            </section>
+
+            <!-- Section 5: 職歴 -->
+            <section class="form-section">
+                <h3 class="section-title">職歴 <span class="sub-en">/ Work History</span></h3>
+                <div class="dynamic-list" id="work-history-list" data-type="work_history">
+                    <div class="dynamic-list-header">
+                        <span class="col-year">年 / Yr</span>
+                        <span class="col-month">月 / Mo</span>
+                        <span class="col-detail">会社名・部署・役職・入社・退職 / Company, Role &amp; Status</span>
+                        <span class="col-action"></span>
+                    </div>
+                    <div class="dynamic-row">
+                        <input type="number" class="input-year" name="work_year" placeholder="2018" min="1900" max="2100">
+                        <select class="input-month" name="work_month">
+                            <option value="">月 / Mo</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <input type="text" class="input-detail" name="work_detail" placeholder="株式会社○○ 入社 / Sample Corp. (Backend Engineer)">
+                        <button type="button" class="btn-remove" title="削除 / Remove">×</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add-row" data-target="work-history-list">+ 行を追加 / Add Row</button>
+            </section>
+
+            <!-- Section 6: 免許・資格 -->
+            <section class="form-section">
+                <h3 class="section-title">免許・資格 <span class="sub-en">/ Licenses &amp; Certifications</span></h3>
+                <div class="dynamic-list" id="licenses-list" data-type="licenses">
+                    <div class="dynamic-list-header">
+                        <span class="col-year">年 / Yr</span>
+                        <span class="col-month">月 / Mo</span>
+                        <span class="col-detail">資格・免許名・取得 / License &amp; Certification Name</span>
+                        <span class="col-action"></span>
+                    </div>
+                    <div class="dynamic-row">
+                        <input type="number" class="input-year" name="license_year" placeholder="2016" min="1900" max="2100">
+                        <select class="input-month" name="license_month">
+                            <option value="">月 / Mo</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <input type="text" class="input-detail" name="license_detail" placeholder="普通自動車第一種運転免許 / Driver's License (Class 1)">
+                        <button type="button" class="btn-remove" title="削除 / Remove">×</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-add-row" data-target="licenses-list">+ 行を追加 / Add Row</button>
+            </section>
+
+            <!-- Section 7: 志望動機・特技など -->
+            <section class="form-section">
+                <h3 class="section-title">志望動機・特技など <span class="sub-en">/ Statement of Purpose &amp; Skills</span></h3>
+
+                <div class="form-group">
+                    <label for="motivation">志望の動機 <span class="sub-en">/ Reason for Application (Motivation)</span></label>
+                    <textarea id="motivation" name="motivation" rows="4" placeholder="志望動機をご記入ください / Describe your reason for applying, background, and goals..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="hobbies">趣味・特技 <span class="sub-en">/ Hobbies &amp; Special Skills</span></label>
+                    <textarea id="hobbies" name="hobbies" rows="2" placeholder="趣味や特技をご記入ください / e.g. Programming, Hiking, Photography..."></textarea>
+                </div>
+            </section>
+
+            <!-- Section 8: その他 -->
+            <section class="form-section">
+                <h3 class="section-title">その他 <span class="sub-en">/ Additional Information</span></h3>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="commute_time">通勤時間 <span class="sub-en">/ Commute Time</span></label>
+                        <input type="text" id="commute_time" name="commute_time" placeholder="約45分 / ~45 min">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label for="dependents_count">扶養家族数（配偶者を除く） <span class="sub-en">/ Dependents (excl. spouse)</span></label>
+                        <input type="number" id="dependents_count" name="dependents_count" value="0" min="0">
+                    </div>
+                </div>
+
+                <div class="form-row checkbox-row">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="has_spouse" name="has_spouse">
+                            <span class="checkbox-custom"></span>
+                            配偶者 <span class="sub-en">/ Spouse:</span> <span class="checkbox-status">有 (Yes)</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="spouse_support_obligation" name="spouse_support_obligation">
+                            <span class="checkbox-custom"></span>
+                            配偶者の扶養義務 <span class="sub-en">/ Spouse Support:</span> <span class="checkbox-status">有 (Yes)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="requests">本人希望記入欄 <span class="sub-en">/ Personal Preferences &amp; Requests</span></label>
+                    <textarea id="requests" name="requests" rows="3" placeholder="勤務地、勤務時間、入社可能時期など / Desired location, hours, starting date, etc. (Or 特になし / None)"></textarea>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ---------- Right Column: Preview ---------- -->
+        <div class="preview-column">
+            <div class="preview-panel">
+                <h3 class="section-title">プレビュー <span class="sub-en">/ Live Preview</span></h3>
+                <div class="preview-container" id="preview-container">
+                    <iframe id="pdf-preview" title="PDF Preview"></iframe>
+                    <div class="preview-placeholder" id="preview-placeholder">
+                        <div class="placeholder-content">
+                            <span class="placeholder-icon">📄</span>
+                            <p>プレビューがここに表示されます</p>
+                            <p class="helper-text">PDF preview will appear here</p>
+                            <p class="helper-text" style="margin-top: 6px;">「プレビュー」ボタンを押してください / Click Preview above</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== Loading Overlay ===== -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loading-message">処理中 / Processing...</p>
+        </div>
+    </div>
+
+    <!-- ===== Toast Container ===== -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Hidden file input for JSON load -->
+    <input type="file" id="json-file-input" accept=".json" style="display:none">
+
+</body>
+</html>
