@@ -13,6 +13,7 @@
 
 /* ---------- Design Tokens & Themes ---------- */
 :root {
+    color-scheme: light;
     --bg-main: #f0f2f5;
     --bg-card: #ffffff;
     --bg-secondary: #f3f4f6;
@@ -35,15 +36,16 @@
 }
 
 [data-theme="dark"] {
+    color-scheme: dark;
     --bg-main: #0b0f19;
     --bg-card: #151c2c;
     --bg-secondary: #1e293b;
     --bg-input: #0f172a;
-    --bg-subitems: #0f172a;
+    --bg-subitems: #0c1220;
     --bg-viewport: #07090e;
     --border-color: #27354f;
     --border-input: #334155;
-    --border-subitems: #334155;
+    --border-subitems: #26334d;
     --text-main: #f1f5f9;
     --text-title: #f8fafc;
     --text-label: #cbd5e1;
@@ -54,6 +56,12 @@
     --btn-sec-border: #3b4b66;
     --btn-sec-hover: #263348;
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    color-scheme: dark;
 }
 
 body {
@@ -584,13 +592,14 @@ details[open] .collapse-indicator {
 .subitems-container {
     margin: 6px 0 6px 28px;
     padding: 10px 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-subitems);
+    border: 1px solid var(--border-subitems);
     border-left: 3px solid #6366f1;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .subitems-header {
@@ -677,9 +686,12 @@ details[open] .collapse-indicator {
     flex-shrink: 0;
     font-size: 12px;
     padding: 5px 6px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-input);
     border-radius: 5px;
+    background: var(--bg-input);
+    color: var(--text-main);
     font-family: inherit;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .subitem-row .input-month-sub {
@@ -687,9 +699,12 @@ details[open] .collapse-indicator {
     flex-shrink: 0;
     font-size: 12px;
     padding: 5px 6px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-input);
     border-radius: 5px;
+    background: var(--bg-input);
+    color: var(--text-main);
     font-family: inherit;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .subitem-row .input-detail-sub {
@@ -697,9 +712,12 @@ details[open] .collapse-indicator {
     min-width: 0;
     font-size: 12px;
     padding: 5px 8px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-input);
     border-radius: 5px;
+    background: var(--bg-input);
+    color: var(--text-main);
     font-family: inherit;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .subitem-row .input-year-sub:focus,
