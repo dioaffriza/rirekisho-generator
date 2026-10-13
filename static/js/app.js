@@ -283,15 +283,15 @@ async function generatePDF() {
 }
 
 /**
- * Generate a preview PDF and display it in the iframe.
+ * Generate a high-resolution preview and display it in the preview panel.
  */
 async function previewPDF() {
     const data = collectFormData();
-    showLoading('プレビューを生成中...');
+    showLoading('プレビューを生成中 / Generating preview...');
     setButtonsDisabled(true);
 
     try {
-        const response = await fetch('/api/preview', {
+        const response = await fetch('/api/preview-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -305,20 +305,20 @@ async function previewPDF() {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
 
-        const iframe = document.getElementById('pdf-preview');
+        const img = document.getElementById('pdf-preview');
         const placeholder = document.getElementById('preview-placeholder');
 
         // Revoke previous blob URL if set
-        if (iframe.dataset.blobUrl) {
-            URL.revokeObjectURL(iframe.dataset.blobUrl);
+        if (img.dataset.blobUrl) {
+            URL.revokeObjectURL(img.dataset.blobUrl);
         }
 
-        iframe.src = url;
-        iframe.dataset.blobUrl = url;
-        iframe.classList.add('active');
+        img.src = url;
+        img.dataset.blobUrl = url;
+        img.classList.add('active');
         placeholder.classList.add('hidden');
 
-        showToast('プレビューを更新しました。', 'success');
+        showToast('プレビューを更新しました / Preview updated', 'success');
     } catch (err) {
         console.error('Preview error:', err);
         showToast(`プレビュー生成に失敗しました: ${err.message}`, 'error');

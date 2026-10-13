@@ -85,14 +85,51 @@ def preview_pdf():
         traceback.print_exc()
         return jsonify({"error": f"PDF generation failed: {exc}"}), 500
 
-    import io
-
     return send_file(
         io.BytesIO(pdf_bytes),
         mimetype="application/pdf",
         as_attachment=False,
         download_name="rirekisho.pdf",
     )
+
+
+def pdf_to_preview_png(pdf_bytes: bytes) -> bytes:
+    """Convert PDF bytes to high-resolution PNG image bytes using pdftoppm."""
+    import subprocess
+    proc = subprocess.run(
+        ["pdftoppm", "-png", "-r", "150", "-singlefile"],
+        input=pdf_bytes,
+        capture_output=True,
+        check=True,
+    )
+    return proc.stdout
+
+
+@app.route("/api/preview-image", methods=["POST"])
+def preview_image():
+    """
+    Generate rirekisho PDF and return high-resolution rendered PNG
+    for instant browser preview without PDF plugin dependencies.
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+    try:
+        pdf_bytes = pdf_generator.generate_rirekisho_pdf(data)
+        png_bytes = pdf_to_preview_png(pdf_bytes)
+    except Exception as exc:
+        traceback.print_exc()
+        return jsonify({"error": f"Preview image generation failed: {exc}"}), 500
+
+    import io
+
+    return send_file(
+        io.BytesIO(png_bytes),
+        mimetype="image/png",
+        as_attachment=False,
+    )
+
 
 
 @app.route("/api/eras", methods=["GET"])
