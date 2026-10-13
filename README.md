@@ -94,7 +94,6 @@ cv-maker/
 │       └── html2pdf.bundle.min.js  # Vendored client-side PDF generator (offline-ready)
 ├── static/
 │   └── showcase.gif       # App showcase animation
-└── legacy/                # Optional Flask backend (app.py, pdf_generator.py, etc.)
 ```
 
 ---

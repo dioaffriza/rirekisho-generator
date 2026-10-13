@@ -1,29 +1,8 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-
-# Downloaded font files (downloaded automatically on first run)
-fonts/*.ttf
-fonts/*.zip
-!fonts/.gitkeep
-
 # Generated test outputs & temporary files
 *.pdf
 *.log
 test_*.png
-.pytest_cache/
+test_artifacts/
 
 # Editor & OS files
 .DS_Store
@@ -31,4 +10,3 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
-test_artifacts/
