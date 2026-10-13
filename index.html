@@ -214,7 +214,10 @@
 
             <!-- Section 5: 職歴 -->
             <section class="form-section">
-                <h3 class="section-title">職歴 <span class="sub-en">/ Work History</span></h3>
+                <div class="section-title-wrap">
+                    <h3 class="section-title">職歴 <span class="sub-en">/ Work History</span></h3>
+                    <span class="section-badge-hint">派遣元・派遣先サブ項目対応 / Supports Dispatched (Haken) details</span>
+                </div>
                 <div class="dynamic-list" id="work-history-list" data-type="work_history">
                     <div class="dynamic-list-header">
                         <span class="col-year">年 / Yr</span>
@@ -222,25 +225,39 @@
                         <span class="col-detail">会社名・部署・役職・入社・退職 / Company, Role &amp; Status</span>
                         <span class="col-action"></span>
                     </div>
-                    <div class="dynamic-row">
-                        <input type="number" class="input-year" name="work_year" placeholder="2018" min="1900" max="2100">
-                        <select class="input-month" name="work_month">
-                            <option value="">月 / Mo</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                        </select>
-                        <input type="text" class="input-detail" name="work_detail" placeholder="株式会社○○ 入社 / Sample Corp. (Backend Engineer)">
-                        <button type="button" class="btn-remove" title="削除 / Remove">×</button>
+                    <div class="work-item-group">
+                        <div class="dynamic-row main-row">
+                            <input type="number" class="input-year" name="work_year" placeholder="2018" min="1900" max="2100">
+                            <select class="input-month" name="work_month">
+                                <option value="">月 / Mo</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                            <input type="text" class="input-detail" name="work_detail" placeholder="株式会社○○ 入社 / 派遣元会社 登録">
+                            <button type="button" class="btn-add-subitem" title="派遣先サブ項目を追加 / Add Dispatched Company (Haken)">+ 派遣先</button>
+                            <button type="button" class="btn-remove" title="削除 / Remove">×</button>
+                        </div>
+                        <div class="subitems-container" style="display: none;">
+                            <div class="subitems-header">
+                                <span class="subitems-title">↳ 派遣先詳細 / Dispatched Company Details</span>
+                                <div class="subitems-quick-actions">
+                                    <button type="button" class="btn-quick-tag" data-tag="派遣先">+ 派遣先に派遣</button>
+                                    <button type="button" class="btn-quick-tag" data-tag="満了">+ 期間満了</button>
+                                    <button type="button" class="btn-add-subitem-row">+ 項目追加</button>
+                                </div>
+                            </div>
+                            <div class="subitems-list"></div>
+                        </div>
                     </div>
                 </div>
                 <button type="button" class="btn-add-row" data-target="work-history-list">+ 行を追加 / Add Row</button>

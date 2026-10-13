@@ -95,14 +95,31 @@ function renderRirekishoSheet(data) {
     });
 
     (data.work_history || []).forEach(item => {
-        if (item.year || item.month || item.detail) {
+        if (item.year || item.month || item.detail || (item.sub_items && item.sub_items.length > 0)) {
             const eraYr = item.year ? formatDateJapanese(item.year, 0) : "";
             historyRows.push({
                 year: eraYr,
                 month: item.month || "",
                 detail: escapeHtml(item.detail),
-                isHeader: false
+                isHeader: false,
+                isSubItem: false
             });
+
+            // Dispatched Company Sub-items (派遣先)
+            if (item.sub_items && Array.isArray(item.sub_items)) {
+                item.sub_items.forEach(sub => {
+                    if (sub.year || sub.month || sub.detail) {
+                        const subEraYr = sub.year ? formatDateJapanese(sub.year, 0) : "";
+                        historyRows.push({
+                            year: subEraYr,
+                            month: sub.month || "",
+                            detail: `<span class="haken-indent">　</span>${escapeHtml(sub.detail)}`,
+                            isHeader: false,
+                            isSubItem: true
+                        });
+                    }
+                });
+            }
         }
     });
 
@@ -112,6 +129,9 @@ function renderRirekishoSheet(data) {
         detail: isBilingual ? "以上 <span class='en-sub'>/ End</span>" : "以上",
         isEnd: true
     });
+
+    // Determine if table needs compact layout to stay within single A4 page
+    const isCompact = historyRows.length > 11;
 
     // Pad to at least 11 rows total
     const TOTAL_HIST_ROWS = 11;
@@ -149,7 +169,7 @@ function renderRirekishoSheet(data) {
         : (data.spouse_support_obligation ? "有" : "無");
 
     return `
-    <div class="a4-sheet ${isBilingual ? 'bilingual-mode' : 'japanese-mode'}" id="printable-rirekisho">
+    <div class="a4-sheet ${isBilingual ? 'bilingual-mode' : 'japanese-mode'} ${isCompact ? 'sheet-compact-history' : ''}" id="printable-rirekisho">
         <!-- Sheet Header -->
         <div class="sheet-top-header">
             <div class="sheet-title-wrap">
@@ -278,7 +298,7 @@ function renderRirekishoSheet(data) {
                 </div>
             </div>
             ${historyRows.map(row => `
-                <div class="sheet-history-row ${row.isHeader ? 'row-category-header' : ''}">
+                <div class="sheet-history-row ${row.isHeader ? 'row-category-header' : ''} ${row.isSubItem ? 'row-subitem' : ''}">
                     <div class="col-yr">${row.year || ''}</div>
                     <div class="col-mo">${row.month || ''}</div>
                     <div class="col-detail ${row.isHeader ? 'text-center' : (row.isEnd ? 'text-right' : '')}">${row.detail || ''}</div>

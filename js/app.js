@@ -31,8 +31,27 @@ const SAMPLE_DATA = {
         { year: "2018", month: "3", detail: "○○大学 経済学部 卒業 / Graduated from Univ. Faculty of Economics" }
     ],
     work_history: [
-        { year: "2018", month: "4", detail: "株式会社サンプル商事 入社 / Sample Corp. (Backend Engineer)" },
-        { year: "2023", month: "3", detail: "一身上の都合により退職 / Resigned for personal reasons" }
+        {
+            year: "2018",
+            month: "4",
+            detail: "株式会社スタッフサービス 登録（派遣元） / Staff Service (Agency)",
+            sub_items: [
+                { year: "2018", month: "5", detail: "株式会社メルカリ（派遣先）に派遣 / Dispatched to Mercari, Inc." },
+                { year: "2020", month: "3", detail: "派遣期間満了につき終了 / Completed dispatch contract" }
+            ]
+        },
+        {
+            year: "2020",
+            month: "4",
+            detail: "株式会社サンプル商事 入社 / Sample Corp. (Backend Engineer)",
+            sub_items: []
+        },
+        {
+            year: "2023",
+            month: "3",
+            detail: "一身上の都合により退職 / Resigned for personal reasons",
+            sub_items: []
+        }
     ],
     licenses: [
         { year: "2016", month: "8", detail: "普通自動車第一種運転免許 / Driver's License (Class 1)" },
@@ -88,12 +107,67 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Dynamic row buttons (remove)
+    // Dynamic row buttons (remove & work history sub-items)
     document.querySelectorAll(".dynamic-list").forEach(list => {
         list.addEventListener("click", (e) => {
+            // Remove main dynamic row
             if (e.target.classList.contains("btn-remove")) {
                 removeDynamicRow(e.target);
                 onFormChange();
+                return;
+            }
+
+            // Work history specific buttons
+            const group = e.target.closest(".work-item-group");
+            if (!group) return;
+
+            // Toggle / add sub-item
+            if (e.target.closest(".btn-add-subitem")) {
+                const subContainer = group.querySelector(".subitems-container");
+                const subList = group.querySelector(".subitems-list");
+                if (subContainer && subList) {
+                    if (subList.children.length === 0) {
+                        addSubItemRow(group, "", "", "株式会社○○（派遣先）に派遣 / Dispatched to ○○ Corp.");
+                    } else {
+                        addSubItemRow(group, "", "", "");
+                    }
+                    onFormChange();
+                }
+                return;
+            }
+
+            // Add sub-item row button inside container
+            if (e.target.closest(".btn-add-subitem-row")) {
+                addSubItemRow(group, "", "", "");
+                onFormChange();
+                return;
+            }
+
+            // Quick tag buttons
+            if (e.target.classList.contains("btn-quick-tag")) {
+                const tagType = e.target.getAttribute("data-tag");
+                if (tagType === "派遣先") {
+                    addSubItemRow(group, "", "", "株式会社○○（派遣先）に派遣 / Dispatched to ○○ Corp.");
+                } else if (tagType === "満了") {
+                    addSubItemRow(group, "", "", "派遣期間満了につき終了 / Completed dispatch contract");
+                }
+                onFormChange();
+                return;
+            }
+
+            // Remove sub-item row
+            if (e.target.closest(".btn-remove-sub")) {
+                const subRow = e.target.closest(".subitem-row");
+                const subList = group.querySelector(".subitems-list");
+                const subContainer = group.querySelector(".subitems-container");
+                const subBtn = group.querySelector(".btn-add-subitem");
+                if (subRow) subRow.remove();
+                if (subList && subList.children.length === 0) {
+                    if (subContainer) subContainer.style.display = "none";
+                    if (subBtn) subBtn.classList.remove("active");
+                }
+                onFormChange();
+                return;
             }
         });
     });
@@ -157,6 +231,38 @@ function val(id) {
 function collectDynamicList(listId) {
     const container = document.getElementById(listId);
     if (!container) return [];
+
+    if (listId === "work-history-list") {
+        const groups = container.querySelectorAll(".work-item-group");
+        const items = [];
+        groups.forEach(group => {
+            const mainRow = group.querySelector(".main-row") || group.querySelector(".dynamic-row");
+            const yr = mainRow?.querySelector(".input-year")?.value.trim() || "";
+            const mo = mainRow?.querySelector(".input-month")?.value || "";
+            const det = mainRow?.querySelector(".input-detail")?.value.trim() || "";
+
+            const subItems = [];
+            group.querySelectorAll(".subitem-row").forEach(subRow => {
+                const sYr = subRow.querySelector(".input-year-sub")?.value.trim() || "";
+                const sMo = subRow.querySelector(".input-month-sub")?.value || "";
+                const sDet = subRow.querySelector(".input-detail-sub")?.value.trim() || "";
+                if (sYr || sMo || sDet) {
+                    subItems.push({ year: sYr, month: sMo, detail: sDet });
+                }
+            });
+
+            if (yr || mo || det || subItems.length > 0) {
+                items.push({
+                    year: yr,
+                    month: mo,
+                    detail: det,
+                    sub_items: subItems
+                });
+            }
+        });
+        return items;
+    }
+
     const rows = container.querySelectorAll(".dynamic-row");
     const items = [];
     rows.forEach(row => {
@@ -272,8 +378,27 @@ function populateForm(data) {
 function populateDynamicList(listId, items) {
     const container = document.getElementById(listId);
     if (!container) return;
-    container.querySelectorAll(".dynamic-row").forEach(r => r.remove());
 
+    if (listId === "work-history-list") {
+        container.querySelectorAll(".work-item-group, .dynamic-row").forEach(r => r.remove());
+        const entries = (items && items.length > 0) ? items : [{ year: "", month: "", detail: "", sub_items: [] }];
+        entries.forEach(item => {
+            const group = addWorkHistoryGroup();
+            const mainRow = group.querySelector(".main-row");
+            if (item.year) mainRow.querySelector(".input-year").value = item.year;
+            if (item.month) mainRow.querySelector(".input-month").value = item.month;
+            if (item.detail) mainRow.querySelector(".input-detail").value = item.detail;
+
+            if (item.sub_items && Array.isArray(item.sub_items) && item.sub_items.length > 0) {
+                item.sub_items.forEach(sub => {
+                    addSubItemRow(group, sub.year, sub.month, sub.detail);
+                });
+            }
+        });
+        return;
+    }
+
+    container.querySelectorAll(".dynamic-row").forEach(r => r.remove());
     const entries = (items && items.length > 0) ? items : [{ year: "", month: "", detail: "" }];
     entries.forEach(item => {
         addDynamicRow(listId);
@@ -290,18 +415,21 @@ function populateDynamicList(listId, items) {
 // ============================================================
 
 function addDynamicRow(listId) {
+    if (listId === "work-history-list") {
+        return addWorkHistoryGroup();
+    }
+
     const container = document.getElementById(listId);
     if (!container) return;
     const dataType = container.getAttribute("data-type");
 
     const placeholders = {
         education: "○○高等学校 卒業 / Graduated from Tokyo High School",
-        work_history: "株式会社○○ 入社 / Sample Corp. (Backend Engineer)",
         licenses: "普通自動車第一種運転免許 / Driver's License (Class 1)",
     };
     const placeholder = placeholders[dataType] || "";
 
-    const prefixes = { education: "education", work_history: "work", licenses: "license" };
+    const prefixes = { education: "education", licenses: "license" };
     const prefix = prefixes[dataType] || dataType;
 
     const row = document.createElement("div");
@@ -325,7 +453,106 @@ function addDynamicRow(listId) {
     container.appendChild(row);
 }
 
+function addWorkHistoryGroup() {
+    const container = document.getElementById("work-history-list");
+    if (!container) return null;
+
+    const group = document.createElement("div");
+    group.className = "work-item-group";
+    group.innerHTML = `
+        <div class="dynamic-row main-row">
+            <input type="number" class="input-year" name="work_year" placeholder="2018" min="1900" max="2100">
+            <select class="input-month" name="work_month">
+                <option value="">月 / Mo</option>
+                ${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("")}
+            </select>
+            <input type="text" class="input-detail" name="work_detail" placeholder="株式会社○○ 入社 / 派遣元会社 登録">
+            <button type="button" class="btn-add-subitem" title="派遣先サブ項目を追加 / Add Dispatched Company (Haken)">+ 派遣先</button>
+            <button type="button" class="btn-remove" title="削除 / Remove">×</button>
+        </div>
+        <div class="subitems-container" style="display: none;">
+            <div class="subitems-header">
+                <span class="subitems-title">↳ 派遣先詳細 / Dispatched Company Details</span>
+                <div class="subitems-quick-actions">
+                    <button type="button" class="btn-quick-tag" data-tag="派遣先">+ 派遣先に派遣</button>
+                    <button type="button" class="btn-quick-tag" data-tag="満了">+ 期間満了</button>
+                    <button type="button" class="btn-add-subitem-row">+ 項目追加</button>
+                </div>
+            </div>
+            <div class="subitems-list"></div>
+        </div>
+    `;
+
+    group.querySelectorAll(".main-row input, .main-row select").forEach(el => {
+        el.addEventListener("input", onFormChange);
+        el.addEventListener("change", onFormChange);
+    });
+
+    container.appendChild(group);
+    return group;
+}
+
+function addSubItemRow(group, year = "", month = "", detail = "") {
+    const subContainer = group.querySelector(".subitems-container");
+    const subList = group.querySelector(".subitems-list");
+    if (!subContainer || !subList) return null;
+
+    subContainer.style.display = "flex";
+    const subBtn = group.querySelector(".btn-add-subitem");
+    if (subBtn) subBtn.classList.add("active");
+
+    const row = document.createElement("div");
+    row.className = "subitem-row";
+    row.innerHTML = `
+        <span class="subitem-bullet">↳</span>
+        <input type="number" class="input-year-sub" placeholder="2018" min="1900" max="2100" value="${escapeHtmlAttr(year)}">
+        <select class="input-month-sub">
+            <option value="">月 / Mo</option>
+            ${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}" ${String(month) === String(i + 1) ? 'selected' : ''}>${i + 1}</option>`).join("")}
+        </select>
+        <input type="text" class="input-detail-sub" placeholder="株式会社○○（派遣先）に派遣 / Dispatched to ○○ Corp." value="${escapeHtmlAttr(detail)}">
+        <button type="button" class="btn-remove-sub" title="サブ項目を削除 / Remove Sub-item">×</button>
+    `;
+
+    row.querySelectorAll("input, select").forEach(el => {
+        el.addEventListener("input", onFormChange);
+        el.addEventListener("change", onFormChange);
+    });
+
+    subList.appendChild(row);
+    return row;
+}
+
+function escapeHtmlAttr(str) {
+    if (!str) return "";
+    return String(str).replace(/"/g, "&quot;");
+}
+
 function removeDynamicRow(button) {
+    const workGroup = button.closest(".work-item-group");
+    if (workGroup) {
+        const container = document.getElementById("work-history-list");
+        const groups = container.querySelectorAll(".work-item-group");
+        if (groups.length <= 1) {
+            // Reset fields instead of leaving 0 rows
+            const mainRow = workGroup.querySelector(".main-row");
+            if (mainRow) {
+                mainRow.querySelector(".input-year").value = "";
+                mainRow.querySelector(".input-month").value = "";
+                mainRow.querySelector(".input-detail").value = "";
+            }
+            const subList = workGroup.querySelector(".subitems-list");
+            if (subList) subList.innerHTML = "";
+            const subContainer = workGroup.querySelector(".subitems-container");
+            if (subContainer) subContainer.style.display = "none";
+            const subBtn = workGroup.querySelector(".btn-add-subitem");
+            if (subBtn) subBtn.classList.remove("active");
+            return;
+        }
+        workGroup.remove();
+        return;
+    }
+
     const row = button.closest(".dynamic-row");
     const container = row.closest(".dynamic-list");
     const rows = container.querySelectorAll(".dynamic-row");
