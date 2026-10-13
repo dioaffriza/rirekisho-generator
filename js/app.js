@@ -7,6 +7,7 @@
 let currentPhotoBase64 = "";
 let currentScale = 0.72;
 const STORAGE_KEY = "rirekisho_maker_draft_v1";
+const THEME_KEY = "rirekisho_maker_theme";
 
 const SAMPLE_DATA = {
     pdf_style: "bilingual",
@@ -72,6 +73,7 @@ const SAMPLE_DATA = {
 
 document.addEventListener("DOMContentLoaded", () => {
     // Toolbar buttons
+    document.getElementById("btn-theme-toggle")?.addEventListener("click", toggleTheme);
     document.getElementById("btn-generate")?.addEventListener("click", exportPDF);
     document.getElementById("btn-print")?.addEventListener("click", () => window.print());
     document.getElementById("btn-sample")?.addEventListener("click", loadSampleData);
@@ -82,6 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("json-file-input")?.addEventListener("change", loadJSON);
     document.getElementById("btn-remove-photo")?.addEventListener("click", removePhoto);
+
+    // Initialize Theme
+    initTheme();
 
     // Zoom buttons
     document.getElementById("btn-zoom-in")?.addEventListener("click", () => setZoom(currentScale + 0.08));
@@ -790,4 +795,61 @@ function debounce(fn, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(() => fn(...args), wait);
     };
+}
+
+// ============================================================
+// Theme Management (Light / Dark Mode)
+// ============================================================
+
+function initTheme() {
+    try {
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+        applyTheme(initialTheme, false);
+    } catch {
+        applyTheme("light", false);
+    }
+}
+
+function applyTheme(theme, notify = false) {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+        localStorage.setItem(THEME_KEY, theme);
+    } catch {}
+
+    const iconEl = document.getElementById("theme-icon");
+    const labelEl = document.getElementById("theme-label");
+    if (theme === "dark") {
+        if (iconEl) iconEl.textContent = "☀️";
+        if (labelEl) labelEl.innerHTML = 'ライト <small>/ Light</small>';
+    } else {
+        if (iconEl) iconEl.textContent = "🌙";
+        if (labelEl) labelEl.innerHTML = 'ダーク <small>/ Dark</small>';
+    }
+
+    if (notify) {
+        showToast(
+            theme === "dark" ? "ダークモードに切り替えました / Dark mode enabled" : "ライトモードに切り替えました / Light mode enabled",
+            "info",
+            1800
+        );
+    }
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const next = current === "dark" ? "light" : "dark";
+    applyTheme(next, true);
+}
+
+// Listen to OS color scheme changes if user hasn't explicitly set a preference
+if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+        try {
+            if (!localStorage.getItem(THEME_KEY)) {
+                applyTheme(e.matches ? "dark" : "light", false);
+            }
+        } catch {}
+    });
 }

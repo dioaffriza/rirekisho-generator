@@ -18,6 +18,19 @@
     <!-- Client-side PDF Generator (html2pdf.js - vendored for offline reliability) -->
     <script src="js/vendor/html2pdf.bundle.min.js"></script>
 
+    <!-- Theme Detection (Avoid Flash of Light Mode) -->
+    <script>
+        (function() {
+            try {
+                const saved = localStorage.getItem("rirekisho_maker_theme");
+                const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                if (saved === "dark" || (!saved && prefersDark)) {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                }
+            } catch (e) {}
+        })();
+    </script>
+
     <!-- App Scripts -->
     <script src="js/era_converter.js" defer></script>
     <script src="js/rirekisho_render.js" defer></script>
@@ -42,6 +55,11 @@
                         <option value="japanese">日本語のみ / Japanese</option>
                     </select>
                 </div>
+
+                <!-- Dark Mode Toggle Button -->
+                <button type="button" id="btn-theme-toggle" class="btn btn-secondary btn-theme" title="ダークモード切替 / Toggle Dark Mode">
+                    <span class="btn-icon" id="theme-icon">🌙</span> <span id="theme-label">ダーク <small>/ Dark</small></span>
+                </button>
 
                 <button type="button" id="btn-sample" class="btn btn-secondary" title="サンプルデータを入力 / Load Sample Data">
                     <span class="btn-icon">✨</span> サンプル <small>/ Sample</small>

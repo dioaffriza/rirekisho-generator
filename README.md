@@ -35,6 +35,14 @@ Renders pixel-accurate, standard JIS-format A4 履歴書 sheets with **bilingual
   - Export and import form data as `.json` files to manage multiple resume versions.
 - **Photo Upload**: Supports portrait photo upload with preview, auto-centering, and removal.
 - **Dynamic Rows**: Easily add or remove entries for Education (学歴), Work History (職歴), and Licenses/Certifications (免許・資格).
+- **Dark Mode Support (🌓 ライト / ダーク)**:
+  - Sleek dark theme toggle with instant response and no light flash on load.
+  - Automatically respects OS color scheme preference (`prefers-color-scheme`) and persists user preference in `localStorage`.
+  - The document viewport adapts to dark mode while the A4 resume sheet preserves true white physical paper fidelity.
+- **Dispatched Worker (派遣先) Sub-items**:
+  - Add sub-items to specify client companies you were dispatched to (派遣先) under staffing agencies (派遣元).
+  - Quick preset insertion for common Japanese phrasing (`〜に派遣`, `派遣期間満了により終了`).
+  - Automatically adjusts row compactness to fit all entries within a single JIS A4 page.
 - **One-Click Bilingual Sample Data**: "✨ サンプル / Sample" button pre-fills the form with a complete, realistic bilingual profile for quick testing.
 
 ---
